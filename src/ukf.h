@@ -16,6 +16,10 @@ class UKF {
    */
   virtual ~UKF();
 
+  void GenerateSigmaPoints(Eigen::MatrixXd* Xsig_out);
+  void AugmentedSigmaPoints(Eigen::MatrixXd* Xsig_out);
+  void SigmaPointPrediction(Eigen::MatrixXd* Xsig_out);
+
   /**
    * ProcessMeasurement
    * @param meas_package The latest measurement data of either radar or laser

@@ -1,13 +1,31 @@
 /* \author Aaron Brown */
 // Create simple 3d highway enviroment using PCL
 // for exploring self-driving car sensors
-
-//#include "render/render.h"
 #include "highway.h"
+#include "ukf.h"
+#include <Eigen/Dense>
 
+
+using Eigen::MatrixXd;
+int main()
+{
+	UKF ukf;
+
+	//Eigen::MatrixXd Xsig = MatrixXd(5,11);
+	//ukf.GenerateSigmaPoints(&Xsig);
+
+	//Eigen::MatrixXd Xsig_aug = MatrixXd(7,15);
+	//ukf.AugmentedSigmaPoints(&Xsig_aug);
+
+	MatrixXd Xsig_pred = MatrixXd(5, 15);
+    ukf.SigmaPointPrediction(&Xsig_pred);
+
+	return 0;
+}
+
+/* 
 int main(int argc, char** argv)
 {
-
 	pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
 	viewer->setBackgroundColor(0, 0, 0);
 
@@ -27,8 +45,7 @@ int main(int argc, char** argv)
 
 	double egoVelocity = 25;
 
-	while (frame_count < (frame_per_sec*sec_interval))
-	{
+	while (frame_count < (frame_per_sec*sec_interval)){
 		viewer->removeAllPointClouds();
 		viewer->removeAllShapes();
 
@@ -36,8 +53,8 @@ int main(int argc, char** argv)
 		highway.stepHighway(egoVelocity,time_us, frame_per_sec, viewer);
 		viewer->spinOnce(1000/frame_per_sec);
 		frame_count++;
-		time_us = 1000000*frame_count/frame_per_sec;
-		
+		time_us = 1000000*frame_count/frame_per_sec;	
 	}
-
 }
+
+*/
