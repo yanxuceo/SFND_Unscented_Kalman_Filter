@@ -482,6 +482,12 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   Eigen::MatrixXd K = PHt * Si;
 
   x_ = x_ + K * y;
+
+  if(x_(3) > M_PI) 
+    x_(3) -= 2.*M_PI;
+  if(x_(3) < -M_PI) 
+    x_(3) += 2.*M_PI;
+
   size_t x_size = x_.size();
   Eigen::MatrixXd I = Eigen::MatrixXd::Identity(x_size, x_size);
 
