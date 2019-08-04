@@ -5,23 +5,10 @@
 #include "measurement_package.h"
 
 class UKF {
- public:
-  /**
-   * Constructor
-   */
+public:
+
   UKF();
-
-  /**
-   * Destructor
-   */
   virtual ~UKF();
-
-  void GenerateSigmaPoints(Eigen::MatrixXd* Xsig_out);
-  void AugmentedSigmaPoints(Eigen::MatrixXd* Xsig_out);
-  void SigmaPointPrediction(Eigen::MatrixXd* Xsig_out);
-  void PredictMeanAndCovariance(Eigen::VectorXd* x_out, Eigen::MatrixXd* P_out);
-  void PredictRadarMeasurement(Eigen::VectorXd* z_out, Eigen::MatrixXd* S_out);
-  void UpdateState(Eigen::VectorXd* x_out, Eigen::MatrixXd* P_out);
 
   /**
    * ProcessMeasurement
@@ -69,6 +56,9 @@ class UKF {
   // LiDAR measurement matrix
   Eigen::MatrixXd H_;
 
+  // LiDAR measurement covariance
+  Eigen::MatrixXd R_;
+
 
   // predicted sigma points matrix
   Eigen::MatrixXd Xsig_pred_;
@@ -108,6 +98,18 @@ class UKF {
 
   // Sigma point spreading parameter
   double lambda_;
+
+  Eigen::VectorXd radar_measure_z_;
+  Eigen::VectorXd lidar_measure_z_;
+
+private:
+  void GenerateSigmaPoints(Eigen::MatrixXd* Xsig_out);
+  void AugmentedSigmaPoints(Eigen::MatrixXd* Xsig_out);
+  void SigmaPointPrediction(const Eigen::MatrixXd &Xsig_aug, const double &delta_t, Eigen::MatrixXd* Xsig_out);
+  void PredictMeanAndCovariance(const Eigen::MatrixXd &Xsig_pred, Eigen::VectorXd* x_out, Eigen::MatrixXd* P_out);
+  void PredictRadarMeasurement(const Eigen::MatrixXd &Xsig_pred,Eigen::VectorXd* zsig_out, Eigen::VectorXd* z_out, Eigen::MatrixXd* S_out);
+  void UpdateState_RadarHelper(const Eigen::MatrixXd &Xsig_pred, const Eigen::MatrixXd &Zsig, const Eigen::VectorXd &z_pred, const Eigen::MatrixXd &S);
+
 };
 
 #endif  // UKF_H
