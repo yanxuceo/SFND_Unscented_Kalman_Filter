@@ -468,7 +468,25 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
    * covariance, P_.
    * You can also calculate the lidar NIS, if desired.
    */
+  lidar_measure_z_ <<  meas_package.raw_measurements_[0],
+                       meas_package.raw_measurements_[1];
 
+  
+  Eigen::VectorXd z_pred = H_ * x_;
+  Eigen::VectorXd y = lidar_measure_z_ - z_pred;
+  Eigen::MatrixXd Ht = H_.transpose();
+
+  Eigen::MatrixXd S = H_ * P_ * Ht + R_;
+  Eigen::MatrixXd Si = S.inverse();
+
+  Eigen::MatrixXd PHt = P_ * Ht;
+  Eigen::MatrixXd K = PHt * Si;
+
+  x_ = x_ + K * y;
+  size_t x_size = x_.size();
+  Eigen::MatrixXd I = Eigen::MatrixXd::Identity(x_size, x_size);
+
+  P_ = (I - K * H_) * P_;
  
 }
 
