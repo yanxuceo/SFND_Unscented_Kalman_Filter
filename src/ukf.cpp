@@ -384,13 +384,14 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    * TODO: Complete this function! Make sure you switch between lidar and radar
    * measurements.
    */
-  // if measurement comes from LiDAR
-  if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
-    
-    if(!is_initialized_) {
-        std::cout << "UKF Initialization from Lidar " << std::endl;
-        is_initialized_ = true;
 
+  if(!is_initialized_) {
+      std::cout << "UKF Initialization " << std::endl;
+      is_initialized_ = true;
+    
+      if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
+        std::cout << "Initialization from Lidar " << std::endl;
+          
         x_ << meas_package.raw_measurements_[0],
               meas_package.raw_measurements_[1],
               0,
@@ -398,39 +399,37 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
               0;
 
         previous_timestamp_ = meas_package.timestamp_;
-        return;   
-    }
+      } 
+      else if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+        std::cout << "Initialization from Radar " << std::endl;
 
-    // to do, LiDAR measurement model
-    delta_t_ = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
-    previous_timestamp_ = meas_package.timestamp_;
+        double rho = meas_package.raw_measurements_[0];
+        double phi = meas_package.raw_measurements_[1];
 
-
-
-  } 
-  else { // if measurement comes from Radar
-    
-    if(!is_initialized_) {
-        std::cout << "UKF Initialization from Radar " << std::endl;
-        is_initialized_ = true;
-
-        x_ << 0,
+        x_ << rho*cos(phi),
+              -rho*sin(phi),
               0,
-              meas_package.raw_measurements_[0],
-              meas_package.raw_measurements_[1],
+              0,
               meas_package.raw_measurements_[2];
-
+          
         previous_timestamp_ = meas_package.timestamp_;
-        return;   
+      }
     }
 
-    // to do, Radar measurement model
     delta_t_ = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
     previous_timestamp_ = meas_package.timestamp_;
 
+    Prediction(delta_t_);
 
+   
+    if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
+       // LiDAR measurement model
+      UpdateLidar(meas_package);
+    } else {  
+      // Radar measurement model
+      UpdateRadar(meas_package);
+    }
 
-  }
 }
 
 
