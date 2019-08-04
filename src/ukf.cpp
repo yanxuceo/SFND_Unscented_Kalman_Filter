@@ -243,7 +243,7 @@ void UKF::PredictMeanAndCovariance(const Eigen::MatrixXd &Xsig_pred, Eigen::Vect
 }
 
 
-void UKF::PredictRadarMeasurement(const Eigen::MatrixXd &Xsig_pred, Eigen::VectorXd* zsig_out ,Eigen::VectorXd* z_out, Eigen::MatrixXd* S_out) {
+void UKF::PredictRadarMeasurement(const Eigen::MatrixXd &Xsig_pred, Eigen::MatrixXd* zsig_out ,Eigen::VectorXd* z_out, Eigen::MatrixXd* S_out) {
   
   // set measurement dimension, radar can measure r, phi, and r_dot
   int n_z = 3;
@@ -431,7 +431,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
 
   }
-
 }
 
 
@@ -490,6 +489,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  
 }
 
+
 void UKF::UpdateRadar(MeasurementPackage meas_package) {
   /**
    * Use radar data to update the belief 
@@ -498,5 +498,23 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
    * You can also calculate the radar NIS, if desired.
    */
 
+  // generate sigma points
+  Eigen::MatrixXd Xsig_aug = MatrixXd(7,15);
+	AugmentedSigmaPoints(&Xsig_aug);
+
+  // predict sigma points
+	Eigen::MatrixXd Xsig_pred = MatrixXd(5, 15);
+  SigmaPointPrediction(Xsig_aug, delta_t_, &Xsig_pred);
+
+  Eigen::MatrixXd Zsig = MatrixXd(3, 15);
+	Eigen::VectorXd z_out = VectorXd(3);
+  Eigen::MatrixXd S_out = MatrixXd(3, 3);
+
+  radar_measure_z_ << meas_package.raw_measurements_[0],
+                      meas_package.raw_measurements_[1],
+                      meas_package.raw_measurements_[2];
+
+  PredictRadarMeasurement(Xsig_pred, &Zsig, &z_out, &S_out);
+  UpdateState_RadarHelper(Xsig_pred, Zsig, z_out, S_out);
 
 }
