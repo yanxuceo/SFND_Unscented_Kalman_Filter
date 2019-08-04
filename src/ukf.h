@@ -48,6 +48,8 @@ class UKF {
    */
   void UpdateRadar(MeasurementPackage meas_package);
 
+  double delta_t_;
+  size_t previous_timestamp_;
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -63,6 +65,10 @@ class UKF {
 
   // state covariance matrix
   Eigen::MatrixXd P_;
+
+  // LiDAR measurement matrix
+  Eigen::MatrixXd H_;
+
 
   // predicted sigma points matrix
   Eigen::MatrixXd Xsig_pred_;

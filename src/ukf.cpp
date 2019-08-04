@@ -21,6 +21,14 @@ UKF::UKF() {
 
   // initial covariance matrix
   P_ = MatrixXd(5, 5);
+  P_ << 1, 0, 0, 0, 0,
+        0, 1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0,
+        0, 0, 0, 0, 1;
+
+  H_ << 1, 0, 0, 0, 0,
+        0, 1, 0, 0, 0;
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
   std_a_ = 9;
@@ -56,6 +64,8 @@ UKF::UKF() {
    * TODO: Complete the initialization. See ukf.h for other member properties.
    * Hint: one or more values initialized above might be wildly off...
    */
+  is_initialized_ = false;
+  previous_timestamp_ = 0;
 
 }
 
@@ -550,7 +560,53 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    * TODO: Complete this function! Make sure you switch between lidar and radar
    * measurements.
    */
+  // if measurement comes from LiDAR
+  if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
+    
+    if(!is_initialized_) {
+        std::cout << "UKF Initialization from Lidar " << std::endl;
+        is_initialized_ = true;
 
+        x_ << meas_package.raw_measurements_[0],
+              meas_package.raw_measurements_[1],
+              0,
+              0,
+              0;
+
+        previous_timestamp_ = meas_package.timestamp_;
+        return;   
+    }
+
+    // to do, LiDAR measurement model
+    delta_t_ = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
+    previous_timestamp_ = meas_package.timestamp_;
+    
+
+
+  } 
+  else { // if measurement comes from Radar
+    
+    if(!is_initialized_) {
+        std::cout << "UKF Initialization from Radar " << std::endl;
+        is_initialized_ = true;
+
+        x_ << 0,
+              0,
+              meas_package.raw_measurements_[0],
+              meas_package.raw_measurements_[1],
+              meas_package.raw_measurements_[2];
+
+        previous_timestamp_ = meas_package.timestamp_;
+        return;   
+    }
+
+    // to do, Radar measurement model
+    delta_t_ = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
+    previous_timestamp_ = meas_package.timestamp_;
+
+
+
+  }
 
 }
 
